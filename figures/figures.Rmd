@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo=TRUE, comment=TRUE)
+knitr::opts_chunk$set(echo=TRUE, comment=NULL)
 options(readr.show_col_types = FALSE)
 ```
 
@@ -114,13 +114,12 @@ pivot_wider(dat %>% filter(set != 'all' & ! str_ends(group, ':lb') & group != 'b
   select(x, y) %>%
   summary()
 ```
-
 ```{r}
 # NB: We ignore the lb and erroneously redundant comparisons (cf. filter)
 
 # Based on https://stackoverflow.com/questions/32123288/position-ggplot-text-in-each-corner
 annotations <- tibble(
-        xpos=c(-.12),
+        xpos=c(-.15),
         ypos=c(+1.),
         label=c("A"),
         hjustvar=c(0),
@@ -144,10 +143,21 @@ g = pivot_wider(dat %>% filter(set != 'all' & ! str_ends(group, ':lb') & group !
   ggtitle('Performance map of model configurations') +
   labs(shape='Gene categories\nSorting',
        colour='Gene classes') +
-  xlim(-0.12, +.21) +
-  ylim(+0.5, 1.00) +
+  xlim(-.15, +.21) +
+  ylim(.5, 1.00) +
   NULL;
 
+g
+```
+
+```{r}
+as_ggplot(get_legend(g))
+```
+```{r}
+g + theme(legend.position='none')
+```
+
+```{r}
 ggsave(filename='performance1_legend.png', as_ggplot(get_legend(g)))
 
 ggsave(filename='performance1.png', g + theme(legend.position='none'))
@@ -161,10 +171,9 @@ pivot_wider(dat %>% filter(set != 'all' & ! str_ends(group, ':lb') & group != 'b
   mutate(group=fct_relevel(group, o))
 ```
 
-
 ```{r, fig.width=3, fig.height=3}
 annotations <- tibble(
-        xpos=c(-.12),
+        xpos=c(-.15),
         ypos=c(+1.),
         label=c("B"),
         hjustvar=c(0),
@@ -189,8 +198,8 @@ g = pivot_wider(dat %>% filter(set != 'all' & ! str_ends(group, ':lb') & group !
   ggtitle('Performance map of model configurations (averaged)') +
   labs(shape='Gene categories\nSorting',
        colour='Gene classes') +
-  xlim(-0.12, +.21) +
-  ylim(+0.5, 1.00)
+  xlim(-0.21, +.21) +
+  ylim(+0.6, 1.00)
 
 # ggsave(filename='performance2_legend.png', as_ggplot(get_legend(g)))
 
@@ -233,7 +242,7 @@ g = ggplot(t, aes(mean_LM - mean_nonLM, max_LM)) +
   ggtitle('Performance map of model configurations (averaged over feature sets)') +
   labs(shape='Gene categories\nSorting',
        colour='Gene classes') +
-  xlim(-0.12, +.21) +
+  xlim(-0.15, +.21) +
   ylim(+0.5, 1.00)
 
 ggsave(filename='performance2_legend.png', as_ggplot(get_legend(g)))
@@ -255,7 +264,7 @@ pivot_wider(dat %>% filter(set != 'all' & ! str_ends(group, ':lb') & group != 'b
   xlab('Specificity indicator') +
   ylab('Sensitivity indicator') +
   ggtitle('Performance map of model configurations (coding genes)') +
-  xlim(-.1, +.2) +
+  xlim(-.2, +.2) +
   ylim(.6, 1.)
 ```
 
@@ -271,7 +280,7 @@ pivot_wider(dat %>% filter(set != 'all' & ! str_ends(group, ':lb') & group != 'b
   xlab('Specificity indicator') +
   ylab('Sensitivity indicator') +
   ggtitle('Performance map of model configurations (lincRNAs)') +
-  xlim(-.1, +.2) +
+  xlim(-.2, +.2) +
   ylim(.6, 1.)
 ```
 
@@ -307,8 +316,8 @@ pivot_wider(dat %>% filter(set != 'all' & ! str_ends(group, ':lb') & group != 'b
 
 ```{r, fig.width=3, fig.height=3}
 annotations <- tibble(
-        xpos=c(-.05),
-        ypos=c(+.015),
+        xpos=c(-.042),
+        ypos=c(+.012),
         label=c("A"),
         hjustvar=c(0),
         vjustvar=c(1))
@@ -351,7 +360,7 @@ g1 = pivot_wider(dat %>% filter(set != 'all' & ! str_ends(group, ':lb') & group 
             sd_specificity=sd(specificity),
             specificity=mean(specificity)) %>%
 # filter(set != 'Ulzs') %>%
-  ggplot(aes(specificity, sensitivity, colour=set)) +
+  ggplot(aes(specificity, sensitivity)) +
   geom_segment(aes(x=specificity,
                    xend=specificity,
                    y=sensitivity - sd_sensitivity/sqrt(n),
@@ -360,9 +369,9 @@ g1 = pivot_wider(dat %>% filter(set != 'all' & ! str_ends(group, ':lb') & group 
                    xend=specificity + sd_specificity/sqrt(n),
                    y=sensitivity,
                    yend=sensitivity)) +
-  geom_point(aes(colour=set), size=4) +
+  geom_point(aes(), size=4) +
   geom_text(aes(label=set), colour='#ffffff', size=2.5, fontface="bold") +
-  geom_rect(data=tibble(min=-.005, max=+.014),
+  geom_rect(data=tibble(min=-.005, max=+.0119),
             aes(x=NULL, y=NULL, xmin=min, xmax=max, ymin=min, ymax=max, colour=NULL),
             fill=NA, colour='lightgray') +
   geom_text(data=annotations, aes(colour=NULL, xpos, ypos, hjust=hjustvar, vjust=vjustvar, label=label), size=9) +
@@ -370,8 +379,8 @@ g1 = pivot_wider(dat %>% filter(set != 'all' & ! str_ends(group, ':lb') & group 
   ylab('Sensitivity indicator') +
   labs(colour='Feature set') +
   ggtitle('Performance map of feature sets') +
-  xlim(-.05, +.015) +
-  ylim(-.05, +.015) +
+  xlim(-.042, +.012) +
+  ylim(-.042, +.012) +
   theme(legend.position='none')
 
 ggsave(filename='fsperf_large.png', g1, width=7, height=7)
@@ -381,8 +390,8 @@ g1
 
 ```{r, fig.width=3, fig.height=3}
 annotations <- tibble(
-        xpos=c(-.0048),
-        ypos=c(+.013),
+        xpos=c(-.005),
+        ypos=c(+.0119),
         label=c("B"),
         hjustvar=c(0),
         vjustvar=c(1))
@@ -422,7 +431,7 @@ g2 = pivot_wider(dat %>% filter(set != 'all' & ! str_ends(group, ':lb') & group 
             sd_specificity=sd(specificity),
             specificity=mean(specificity)) %>%
   filter(set != '2') %>%
-  ggplot(aes(specificity, sensitivity, colour=set)) +
+  ggplot(aes(specificity, sensitivity)) +
   geom_segment(aes(x=specificity,
                    xend=specificity,
                    y=sensitivity - sd_sensitivity/sqrt(n),
@@ -431,19 +440,15 @@ g2 = pivot_wider(dat %>% filter(set != 'all' & ! str_ends(group, ':lb') & group 
                    xend=specificity + sd_specificity/sqrt(n),
                    y=sensitivity,
                    yend=sensitivity)) +
-  geom_point(aes(colour=set), size=4) +
+  geom_point(aes(), size=4) +
   geom_text(aes(label=set), colour='#ffffff', size=2.5, fontface="bold") +
-# geom_text_repel(aes(label=set), size=2.5, fontface="bold") +
-  geom_rect(data=tibble(min=-.005, max=+.014),
-            aes(x=NULL, y=NULL, xmin=min, xmax=max, ymin=min, ymax=max, colour=NULL),
-            fill=NA, colour='lightgray') +
   geom_text(data=annotations, aes(colour=NULL, xpos, ypos, hjust=hjustvar, vjust=vjustvar, label=label), size=9) +
   xlab('Changes in specificity') +
   ylab('Changes in sensitivity') +
   labs(colour='Feature set') +
   ggtitle('Performance map of feature sets (detail)') +
-  xlim(-.005, +.014) +
-  ylim(-.005, +.014) +
+  xlim(-.005, +.0119) +
+  ylim(-.005, +.01191) +
   theme(legend.position='none')
 
 ggsave(filename='fsperf_defail.png', g2, width=7, height=7)

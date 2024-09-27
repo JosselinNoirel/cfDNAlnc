@@ -1,0 +1,92 @@
+---
+title: "Figures"
+author: "Elyas Mouhou et al."
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, comment=NULL)
+options(readr.show_col_types = FALSE)
+```
+
+## Preamble
+
+```{r, message=FALSE, warning=FALSE}
+library('tidyverse')
+library('glue')
+theme_set(theme_bw())
+set.seed(123)
+```
+
+## Raw data
+
+```{r}
+o = str_split('PF:NF PF:mid PF:b PF:u NF:mid NF:b NF:u b:mid b:u', ' ')[[1]]
+
+filename = '../data/042_SVC_performances_means/grouped_performance.tsv';
+hdr = read_table(filename, n_max=1, col_names=FALSE) %>% unlist(use.names=FALSE)
+dat = read_table(filename, skip=1, col_names=c('index', hdr)) %>%
+  select(-index) %>%
+  rename(ontology=ontologyGroup, sort=sortingMethod, set=features, category=rna_type) %>%
+    select(-median, -min) %>%
+  mutate(group=recode(group,
+                      PFb="PF:b", NFb="NF:b", PFNF="PF:NF", PFu="PF:u",
+                      NFu="NF:u", bu="b:u", PFlb="PF:lb", NFlb="NF:lb",
+                      blb="b:lb", PFmid="PF:mid", NFmid="NF:mid",
+                      bmid="b:mid", bNF="b:NF")) %>%
+  filter(ontology %in% c('lymphoMyeloid', 'nonLymphoMyeloid')) %>%
+  mutate(ontology=recode(ontology, lymphoMyeloid='LM', nonLymphoMyeloid='nonLM'))
+```
+
+```{r}
+dat %>% pull(performance) %>% unique
+```
+
+
+## Metrics
+
+```{r}
+plot_metric = function(dat, metric) {
+  dat %>%
+    filter(performance == metric &
+             set != 'all' &
+             ! str_ends(group, ':lb') &
+             group != 'b:NF') %>%
+    pivot_wider(values_from=c(mean, max), names_from=ontology) %>%
+    mutate(group=fct_relevel(group, o)) %>%
+    ggplot(aes(mean_LM - mean_nonLM, max_LM)) +
+    geom_point(aes(colour=group, shape=paste(category, sort))) +
+    scale_shape_manual(values=c(0, 1, 15, 16),
+                       labels=c('LincRNAs & FC',
+                                'LincRNAs & P',
+                                'Coding & FC',
+                                'Coding & P')) +
+    xlab('Specificity indicator') +
+    ylab('Sensitivity indicator') +
+    ggtitle(glue('Performance map of model configurations {metric}')) +
+    labs(shape='Gene categories\nSorting',
+         colour='Gene classes')
+}
+```
+
+
+```{r}
+plot_metric(dat, 'accuracy_mean')
+```
+
+```{r}
+plot_metric(dat, 'f1_mean')
+```
+
+```{r}
+plot_metric(dat, 'recall_mean')
+```
+
+```{r}
+plot_metric(dat, 'precision_mean')
+```
+
+```{r}
+sessionInfo()
+```
