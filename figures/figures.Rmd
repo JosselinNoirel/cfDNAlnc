@@ -375,8 +375,8 @@ g1 = pivot_wider(dat %>% filter(set != 'all' & ! str_ends(group, ':lb') & group 
             aes(x=NULL, y=NULL, xmin=min, xmax=max, ymin=min, ymax=max, colour=NULL),
             fill=NA, colour='lightgray') +
   geom_text(data=annotations, aes(colour=NULL, xpos, ypos, hjust=hjustvar, vjust=vjustvar, label=label), size=9) +
-  xlab('Specificity indicator') +
-  ylab('Sensitivity indicator') +
+  xlab('Changes in specificity') +
+  ylab('Changes in sensitivity') +
   labs(colour='Feature set') +
   ggtitle('Performance map of feature sets') +
   xlim(-.042, +.012) +
@@ -459,8 +459,7 @@ g2
 ```{r, fig.width=3, fig.height=6}
 plot_grid(g1, g2, align='v', ncol=1)
 
-ggsave(filename='fsperf.png')
-ggsave(filename='fsperf.png')
+ggsave(filename='fsperf.png', width=5, height=9)
 ```
 
 ```{r}
